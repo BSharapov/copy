@@ -1,0 +1,64 @@
+docker run -d --name mariadb --env MARIADB_USER=boris --env MARIADB_PASSWORD=12345 --env MARIADB_ROOT_PASSWORD=12345 -p 3366:3306 mariadb:latest
+docker run -d --name postgres -e POSTGRES_PASSWORD=12345 -p 5533:5432 postgres
+
+mysql -h 0.0.0.0  -P 3366 -u root -p
+
+mysql> CREATE TABLE raw_input( alien_id int(1), alien_name varchar(8), alien_type varchar(8), alien_color varchar(6), witness_id int(2), witness_name varchar(9), witness_last_name varchar(10), witness_address varchar(61), witness_age int(2), location_id int(3), lat double, lon double, place varchar(13), country varchar(2), region varchar(17), time_of_day varchar(5) );
+
+
+docker cp ./data.csv mariadb:/var/lib/mysql/aliens/data.сsv
+LOAD DATA INFILE 'data.сsv' INTO TABLE raw_input COLUMNS TERMINATED BY ','OPTIONALLY  ENCLOSED BY '"' ESCAPED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+
+
+
+mysql -h 0.0.0.0 -P 3366 -u root -p
+boris@server:~$ psql -h 0.0.0.0 -p 5533 -U postgres
+ 
+mysql -h 0.0.0.0 -P 3366  -u root --password=12345 aliens -re 'select DISTINCT alien_id, alien_name, alien_type, alien_color FROM raw_input' > /tmp/myfile.csv
+
+
+select DISTINCT alien_id, alien_name, alien_type, alien_color from raw_input INTO OUTFILE "/home/aliens.csv" COLUMNS TERMINATED BY ','OPTIONALLY  ENCLOSED BY '"' ESCAPED BY '"' LINES TERMINATED BY '\n';
+
+
+4.1 SELECT place, count(*) from raw_input GROUP BY place ORDER BY count(*) DESC LIMIT 1;
+
+4.2 SELECT region, count(*) from raw_input GROUP BY region ORDER BY count(*) LIMIT 1;
+
+4.3  SELECT time_of_day, count(*) from raw_input GROUP BY time_of_day ORDER BY count(*) DESC LIMIT 1;
+
+4.4  SELECT COUNT(DISTINCT location_id) as locations FROM raw_input;
+
+
+CREATE TABLE aliens (
+  alien_id INT PRIMARY KEY,
+  alien_name VARCHAR (8),
+  alien_type VARCHAR (8),
+  alien_color VARCHAR (6)
+);
+
+CREATE TABLE locations (
+    location_id INT PRIMARY KEY,
+    lat DOUBLE PRECISION,
+    lon DOUBLE PRECISION,
+    place VARCHAR (13),
+    country VARCHAR (2),
+    region VARCHAR (17)
+);
+
+CREATE TABLE witnesses (
+    witness_id INT PRIMARY KEY,
+    witness_name VARCHAR (9),
+    witness_last_name VARCHAR (10),
+    witness_address VARCHAR (61),
+    witness_age INT
+);
+
+CREATE TABLE encounters ( 
+alien_id INT,
+witness_id INT, 
+location_id INT, 
+time_of_day VARCHAR(5),
+FOREIGN KEY(alien_id) REFERENCES aliens(alien_id),
+FOREIGN KEY(location_id) REFERENCES locations(location_id),
+FOREIGN KEY(witness_id) REFERENCES witnesses(witness_id)
+);
