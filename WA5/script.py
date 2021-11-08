@@ -37,6 +37,13 @@ for line in cursor_m.fetchall():
     cursor_p.execute("INSERT INTO witnesses (witness_id, witness_name, witness_last_name, witness_address, witness_age) VALUES (%s, %s, %s, %s, %s)", (line[0], line[1], line[2], line[3], line[4]))
     postgres_connection.commit()
 
+# Need to write different id and time_of_day to encounters table;
+
+cursor_m.execute("SELECT alien_id, witness_id, location_id, time_of_day FROM raw_input")
+for line in cursor_m.fetchall():
+    cursor_p.execute("INSERT INTO encounters (alien_id, witness_id, location_id, time_of_day) VALUES (%s, %s, %s, %s)", (line[0], line[1], line[2], line[3]))
+    postgres_connection.commit()
+
 cursor_m.close()
 cursor_p.close()
 mysql_connection.close()

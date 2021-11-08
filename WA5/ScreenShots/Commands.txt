@@ -62,3 +62,20 @@ FOREIGN KEY(alien_id) REFERENCES aliens(alien_id),
 FOREIGN KEY(location_id) REFERENCES locations(location_id),
 FOREIGN KEY(witness_id) REFERENCES witnesses(witness_id)
 );
+
+_________________________________________________________________
+
+Installing Apache Kafka
+sudo apt update
+sudo apt install -y default-jre
+java -version
+sudo bash -c 'echo PATH=\$PATH:/opt/kafka_2.13-2.8.0/bin/ >> /etc/bash.bashrc'
+sudo tar -xzvf kafka_2.13-2.8.0.tgz -C /opt
+cd /opt/kafka_2.13-2.8.0/
+sudo /opt/kafka_2.13-2.8.0/bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
+sudo /opt/kafka_2.13-2.8.0/bin/kafka-server-start.sh -daemon config/server.properties
+
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic aliens
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic encounters
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic locations
+kafka-topics.sh --bootstrap-server localhost:9092 --create --topic witnesses
